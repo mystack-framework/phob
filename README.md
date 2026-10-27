@@ -1,114 +1,162 @@
-# PHOB — PHP High-Performance Obfuscator & Licensing Guard (v4.0.0-hardened)
+# PHOB — PHP High-Performance Obfuscator & Licensing Guard
 
-[![PHP Version](https://img.shields.io/badge/PHP-8.1%20%7C%208.2%20%7C%208.3%20%7C%208.4%2B-blue.svg)](https://www.php.net)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-brightgreen.svg)](#-system-requirements)
-[![Repository](https://img.shields.io/badge/GitHub-mystack--framework%2Fphob-blue?logo=github)](https://github.com/mystack-framework/phob)
+[![PHP Version](https://img.shields.io/badge/PHP-8.1%20%7C%208.2%20%7C%208.3%20%7C%208.4%20%7C%208.5-blue.svg)](https://www.php.net)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20(x64)-brightgreen.svg)](#-system-requirements)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-mystack--framework%2Fphob-blue?logo=github)](https://github.com/mystack-framework/phob)
 
-**PHOB** is an enterprise-grade, high-security C extension for PHP (supporting PHP 8.1, 8.2, 8.3, and 8.4+). It provides multi-layer source code encryption, byte-level obfuscation, hardware-locked device authentication, tamper protection, and in-memory execution designed to protect proprietary PHP intellectual property from reverse engineering, decompilation, and unauthorized redistribution.
+**PHOB** is an enterprise-grade high-performance PHP C-extension providing source code encryption, hardware-bound licensing, and direct in-memory execution for PHP 8.1, 8.2, 8.3, 8.4, and 8.5 on both Windows and Linux platforms.
 
 ---
 
 ## 📑 Table of Contents
-1. [Core Features](#-core-features)
-2. [Security Architecture & Anti-Tamper Protections](#-security-architecture--anti-tamper-protections)
-3. [Binary Downloads](#-binary-downloads)
-4. [System Requirements](#-system-requirements)
-5. [Complete Installation Guide (Windows, Linux, macOS)](#-complete-installation-guide)
-   - [Windows Installation (WAMP / XAMPP / IIS / CLI)](#1-windows-installation)
-   - [Linux Installation (Ubuntu / Debian / RHEL / CentOS)](#2-linux-installation)
-   - [macOS Installation (Homebrew / MAMP / Native)](#3-macos-installation)
-6. [API Reference & Usage](#-api-reference--usage)
+1. [Core Capabilities](#-core-capabilities)
+2. [Supported Platforms & PHP Versions](#-supported-platforms--php-versions)
+3. [Binary Packages & Direct Download Links](#-binary-packages--direct-download-links)
+4. [Installation & Setup Guide](#-installation--setup-guide)
+   - [Windows Installation (WampServer, XAMPP, IIS, CLI)](#1-windows-installation)
+   - [Linux Installation (Ubuntu, Debian, RHEL, aaPanel, Docker)](#2-linux-installation)
+5. [API Reference & Usage](#-api-reference--usage)
    - [`phob_deviceID()`](#1-phob_deviceid)
    - [`phob_build()`](#2-phob_build)
    - [`phob_use()`](#3-phob_use)
-7. [Complete Step-by-Step Example](#-complete-step-by-step-example)
-   - [Step 1: Check Target Machine Device ID](#step-1-get-target-hardware-id)
-   - [Step 2: Obfuscate & Encrypt Application Code](#step-2-build-encrypted-package)
-   - [Step 3: Execute Protected Code Securely](#step-3-run-protected-code)
-8. [Licensing Rules & Enforcement Matrix](#-licensing-rules--enforcement-matrix)
-9. [Troubleshooting & FAQ](#-troubleshooting--faq)
-10. [Security Best Practices](#-security-best-practices)
+6. [Complete Step-by-Step Workflow](#-complete-step-by-step-workflow)
+   - [Step 1: Obtain Target Hardware ID](#step-1-obtain-target-hardware-id)
+   - [Step 2: Build Encrypted Package (`.phob`)](#step-2-build-encrypted-package)
+   - [Step 3: Execute Protected Code in Application](#step-3-execute-protected-code-in-application)
+7. [Licensing Rules, Verification & Errors](#-licensing-rules-verification--errors)
+8. [Troubleshooting & FAQ](#-troubleshooting--faq)
 
 ---
 
-## 🚀 Core Features
+## 🚀 Core Capabilities
 
-- **Multi-Layer AES-256-GCM Encryption**: High-security symmetric authenticated encryption with unique initialization vectors (IVs) and authentication tags for every encrypted file.
-- **Dynamic Hex-Noise Injection (Puzzle Defense)**: Injects pseudo-random bytes and nonces into ciphertext chunks to defeat automated static analysis and signature scanning.
-- **Hardware-Level Device Locking**: Cryptographically binds encrypted scripts to unique machine hardware signatures (Motherboard/DMI UUID on Linux, MachineGuid on Windows, IOPlatformUUID on macOS).
-- **Time-Bound Licensing**: Enforces granular expiry dates (`DD/MM/YYYY`) embedded and signed inside the encrypted envelope.
-- **Pure In-Memory Decryption & Execution**: Decrypts directly into volatile memory; plain source code is never written to temporary files or persistent disk storage.
-- **Memory Zero-Wiping (`memset`)**: Decrypted memory buffers are scrubbed immediately after compilation into Zend opcodes.
-- **Zero External Dependencies**: Operates with native system crypto (OpenSSL) and direct kernel/registry calls without third-party shell dependencies.
-
----
-
-## 🛡️ Security Architecture & Anti-Tamper Protections
-
-| Defense Layer | Mechanism | Protection Scope |
-| :--- | :--- | :--- |
-| **White-Box Secret Synthesis** | Algorithmic XOR runtime key derivation | Prevents static extraction of encryption keys via `strings` or hex editors |
-| **Anti-Debugging (Linux)** | `ptrace(PTRACE_TRACEME)` | Immediately terminates process if GDB, LLDB, or Strace attach to memory |
-| **Anti-Debugging (Windows)** | `IsDebuggerPresent()` | Prohibits attachment of user-mode debuggers (e.g. x64dbg) |
-| **Anti-Dump Protection** | `prctl(PR_SET_DUMPABLE, 0)` | Prevents generating core dumps or reading `/proc/[pid]/mem` on Linux |
-| **Zend Compiler Guard** | Pointer snapshotting (`orig_compile_string`) | Prevents malicious third-party PHP extensions from hooking bytecode compilation |
-| **Symbol Stripping** | Stripped ELF/PE symbol tables (`-s`, `strip --strip-all`) | Removes internal function labels, making binary disassembly opaque |
+- **Pure In-Memory Execution**: Protected files are decrypted directly into volatile memory and compiled into Zend bytecode. Plain source code is never written to temporary files or persistent disk storage.
+- **Immediate Memory Zeroing**: Memory buffers containing plaintext are automatically wiped (`memset`) immediately after Zend opcode compilation.
+- **Hardware-Level Device Locking**: Cryptographically binds protected packages to the target machine's unique hardware signature.
+- **Granular Expiration Dates**: Enforces license expiration down to midnight of the specified `DD/MM/YYYY`.
+- **Zend Hook Protection**: Employs compiler guards to prevent untrusted extensions from hooking or dumping script bytecode.
+- **Stripped Production Binaries**: All shared libraries (`.so` / `.dll`) are stripped of debugging symbols for maximum production security.
 
 ---
 
-## ⬇️ Binary Downloads
+## 💻 Supported Platforms & PHP Versions
 
-Download the pre-compiled, stripped binaries directly from the repository:
-
-| Platform | Binary Name | Download URL |
-| :--- | :--- | :--- |
-| **Windows (x64)** | `phob.dll` | [https://github.com/mystack-framework/phob/blob/main/phob.dll](https://github.com/mystack-framework/phob/blob/main/phob.dll) |
-| **Linux (x86_64)** | `phob.so` | [https://github.com/mystack-framework/phob/blob/main/phob.so](https://github.com/mystack-framework/phob/blob/main/phob.so) |
+| Operating System | Architecture | Supported PHP Versions | Thread Safety |
+| :--- | :--- | :--- | :--- |
+| **Windows** (10, 11, Server) | x64 | PHP 8.1, 8.2, 8.3, 8.4, 8.5 | **ZTS** (Thread Safe - WampServer / Apache) |
+| **Linux** (Ubuntu, Debian, RHEL, CentOS, aaPanel) | x86_64 | PHP 8.1, 8.2, 8.3, 8.4, 8.5 | **NTS** (Non-Thread Safe - FPM / CLI / Nginx) |
 
 ---
 
-## 💻 System Requirements
+## ⬇️ Binary Packages & Direct Download Links
 
-- **PHP Version**: PHP 8.1, 8.2, 8.3, or 8.4+
-- **Architectures**: x86_64 / amd64 / Apple Silicon (ARM64)
-- **Supported Operating Systems**:
-  - **Windows**: Windows 10, Windows 11, Windows Server 2016+ (PHP x64)
-  - **Linux**: Ubuntu 20.04+, Debian 11+, RHEL 8+, CentOS, Rocky Linux, Alpine
-  - **macOS**: macOS Monterey (12+), Ventura (13+), Sonoma (14+), Sequoia (15+)
+The pre-compiled production extensions are organized by operating system and PHP version in the official GitHub repository:
+
+### 🪟 Windows Packages (`.dll`)
+Repository directory: [https://github.com/mystack-framework/phob/tree/main/windows](https://github.com/mystack-framework/phob/tree/main/windows)
+
+| PHP Version | Extension Binary File | Direct Download Link |
+| :---: | :---: | :--- |
+| **PHP 8.1** | `phob.dll` | [https://github.com/mystack-framework/phob/raw/main/windows/php8.1/phob.dll](https://github.com/mystack-framework/phob/raw/main/windows/php8.1/phob.dll) |
+| **PHP 8.2** | `phob.dll` | [https://github.com/mystack-framework/phob/raw/main/windows/php8.2/phob.dll](https://github.com/mystack-framework/phob/raw/main/windows/php8.2/phob.dll) |
+| **PHP 8.3** | `phob.dll` | [https://github.com/mystack-framework/phob/raw/main/windows/php8.3/phob.dll](https://github.com/mystack-framework/phob/raw/main/windows/php8.3/phob.dll) |
+| **PHP 8.4** | `phob.dll` | [https://github.com/mystack-framework/phob/raw/main/windows/php8.4/phob.dll](https://github.com/mystack-framework/phob/raw/main/windows/php8.4/phob.dll) |
+| **PHP 8.5** | `phob.dll` | [https://github.com/mystack-framework/phob/raw/main/windows/php8.5/phob.dll](https://github.com/mystack-framework/phob/raw/main/windows/php8.5/phob.dll) |
+
+### 🐧 Linux Packages (`.so`)
+Repository directory: [https://github.com/mystack-framework/phob/tree/main/linux](https://github.com/mystack-framework/phob/tree/main/linux)
+
+| PHP Version | Extension Binary File | Direct Download Link |
+| :---: | :---: | :--- |
+| **PHP 8.1** | `phob.so` | [https://github.com/mystack-framework/phob/raw/main/linux/php8.1/phob.so](https://github.com/mystack-framework/phob/raw/main/linux/php8.1/phob.so) |
+| **PHP 8.2** | `phob.so` | [https://github.com/mystack-framework/phob/raw/main/linux/php8.2/phob.so](https://github.com/mystack-framework/phob/raw/main/linux/php8.2/phob.so) |
+| **PHP 8.3** | `phob.so` | [https://github.com/mystack-framework/phob/raw/main/linux/php8.3/phob.so](https://github.com/mystack-framework/phob/raw/main/linux/php8.3/phob.so) |
+| **PHP 8.4** | `phob.so` | [https://github.com/mystack-framework/phob/raw/main/linux/php8.4/phob.so](https://github.com/mystack-framework/phob/raw/main/linux/php8.4/phob.so) |
+| **PHP 8.5** | `phob.so` | [https://github.com/mystack-framework/phob/raw/main/linux/php8.5/phob.so](https://github.com/mystack-framework/phob/raw/main/linux/php8.5/phob.so) |
 
 ---
 
-## 📦 Complete Installation Guide
+## 📦 Installation & Setup Guide
 
 ### 1. Windows Installation
-Supported on WampServer, XAMPP, IIS, and Standalone PHP CLI.
+Supported on **WampServer**, **XAMPP**, **IIS**, and standalone **PHP CLI**.
 
-#### Step 1: Download `phob.dll`
-Download [`phob.dll`](https://github.com/mystack-framework/phob/blob/main/phob.dll) and place it into your active PHP `ext/` directory.
+#### Step 1: Identify Extension Directory
+Run this command in PowerShell or Command Prompt:
+```powershell
+php -r "echo ini_get('extension_dir');"
+```
+*(Typical paths: `C:\wamp64\bin\php\php8.3.28\ext\` or `C:\xampp\php\ext\`)*
 
-- **Check your PHP extension directory:**
-  ```powershell
-  php -r "echo ini_get('extension_dir');"
-  ```
-  *(Example path: `C:\wamp64\bin\php\php8.3.28\ext\` or `C:\tools\php83\ext\`)*
+#### Step 2: Download & Copy `phob.dll`
+Download the `phob.dll` matching your active PHP version from [Windows Packages](https://github.com/mystack-framework/phob/tree/main/windows) and place it into that `ext` directory as `php_phob.dll` (or `phob.dll`).
 
-- **Copy command:**
-  ```powershell
-  Copy-Item phob.dll (php -r "echo ini_get('extension_dir');")\phob.dll
-  ```
-
-#### Step 2: Enable in `php.ini`
+#### Step 3: Enable in `php.ini`
 Open your active `php.ini` file (locate it with `php --ini`) and append:
 ```ini
-extension=phob.dll
+extension=php_phob
+```
+*(Or `extension=phob.dll` if placed as `phob.dll`)*
+
+#### Step 4: Restart Web Server & Verify
+- **WampServer / XAMPP**: Restart Apache from the system tray menu.
+- **IIS**: Run `iisreset` in elevated Command Prompt.
+- **CLI Verification**:
+  ```powershell
+  php -m
+  ```
+  Ensure `phob` is listed among the loaded modules.
+
+---
+
+### 2. Linux Installation
+Supported on **Ubuntu**, **Debian**, **CentOS / RHEL**, and control panels like **aaPanel** or **cPanel**.
+
+#### Step 1: Automated Download to Extension Directory
+Run the following shell commands for your target PHP version (e.g. PHP 8.3):
+
+```bash
+# 1. Detect extension directory
+EXT_DIR=$(php -r "echo ini_get('extension_dir');")
+
+# 2. Download matching binary (replace 8.3 with your version: 8.1, 8.2, 8.3, 8.4, 8.5)
+sudo curl -sSL -o "${EXT_DIR}/phob.so" "https://github.com/mystack-framework/phob/raw/main/linux/php8.3/phob.so"
+
+# 3. Set proper execution permissions
+sudo chmod 755 "${EXT_DIR}/phob.so"
 ```
 
-#### Step 3: Restart Web Server
-- For **WAMP / XAMPP**: Restart Apache / PHP-FPM service from the system tray.
-- For **IIS**: Run `iisreset` in elevated Command Prompt / PowerShell.
+#### Step 2: Enable in PHP Configuration
+- **Ubuntu / Debian Standard:**
+  ```bash
+  echo "extension=phob.so" | sudo tee /etc/php/8.3/mods-available/phob.ini
+  sudo phpenmod phob
+  ```
+
+- **aaPanel (e.g., PHP 8.3 at `/www/server/php/83`):**
+  ```bash
+  echo "extension=phob.so" | sudo tee -a /www/server/php/83/etc/php.ini
+  ```
+
+- **RHEL / CentOS / General `php.ini`:**
+  ```bash
+  echo "extension=phob.so" | sudo tee -a $(php -r "echo php_ini_loaded_file();")
+  ```
+
+#### Step 3: Restart PHP Services
+```bash
+# For Ubuntu/Debian PHP-FPM:
+sudo systemctl restart php8.3-fpm
+
+# For aaPanel:
+sudo /etc/init.d/php-fpm-83 restart
+
+# For Apache:
+sudo systemctl restart apache2 # or httpd
+```
 
 #### Step 4: Verify
-```powershell
+```bash
 php --ri phob
 ```
 *Expected Output:*
@@ -123,99 +171,9 @@ Expiry Date Check => Supported
 
 ---
 
-### 2. Linux Installation
-Supported on Ubuntu, Debian, CentOS, RHEL, AlmaLinux, and Rocky Linux.
-
-#### Step 1: Download `phob.so`
-Download [`phob.so`](https://github.com/mystack-framework/phob/blob/main/phob.so) directly using `curl` or `wget`:
-
-```bash
-# Locate extension directory
-EXT_DIR=$(php -r "echo ini_get('extension_dir');")
-
-# Download directly into the extension directory
-sudo curl -sSL -o "${EXT_DIR}/phob.so" "https://raw.githubusercontent.com/mystack-framework/phob/main/phob.so"
-
-# Grant appropriate read & execute permissions
-sudo chmod 755 "${EXT_DIR}/phob.so"
-```
-
-#### Step 2: Enable Extension in PHP
-Create a configuration ini file or edit `php.ini`:
-
-- **For Ubuntu / Debian (CLI & FPM):**
-  ```bash
-  echo "extension=phob.so" | sudo tee /etc/php/8.3/mods-available/phob.ini
-  sudo phpenmod phob
-  ```
-
-- **For RHEL / CentOS / AlmaLinux / Direct `php.ini`:**
-  ```bash
-  echo "extension=phob.so" | sudo tee -a /etc/php.ini
-  ```
-
-#### Step 3: Restart Web Services
-```bash
-# If using PHP-FPM:
-sudo systemctl restart php8.3-fpm
-
-# If using Apache:
-sudo systemctl restart apache2
-# or on CentOS/RHEL:
-sudo systemctl restart httpd
-
-# If using Nginx:
-sudo systemctl restart nginx
-```
-
-#### Step 4: Verify
-```bash
-php --ri phob
-```
-
----
-
-### 3. macOS Installation
-Supported on Homebrew PHP, MAMP, and standalone builds (Intel x86_64 & Apple Silicon ARM64).
-
-#### Step 1: Place `phob.so` in Extension Directory
-```bash
-EXT_DIR=$(php -r "echo ini_get('extension_dir');")
-sudo cp phob.so "${EXT_DIR}/phob.so"
-sudo chmod 755 "${EXT_DIR}/phob.so"
-```
-
-#### Step 2: Configure `php.ini`
-Find your configuration file:
-```bash
-php --ini
-```
-Edit your `php.ini` (e.g., `/opt/homebrew/etc/php/8.3/php.ini` or `/usr/local/etc/php/8.3/php.ini`) and add:
-```ini
-extension=phob.so
-```
-
-#### Step 3: Restart Web Services
-- If using Homebrew service:
-  ```bash
-  brew services restart php
-  ```
-- If using Valet:
-  ```bash
-  valet restart
-  ```
-- If using MAMP: Restart servers from the MAMP control panel.
-
-#### Step 4: Verify
-```bash
-php --ri phob
-```
-
----
-
 ## 📖 API Reference & Usage
 
-The PHOB extension exposes three core functions:
+The PHOB extension provides three primary functions:
 
 ### 1. `phob_deviceID()`
 Returns the unique hardware identifier of the machine currently executing PHP.
@@ -223,13 +181,13 @@ Returns the unique hardware identifier of the machine currently executing PHP.
 ```php
 string phob_deviceID(void)
 ```
-- **Returns**: `string` — A 14-character alphanumeric uppercase hardware hash (e.g., `VRJYS7F6RHGER4`).
-- **Use Case**: Run this function on the client's machine to obtain their target Device ID before issuing a locked license.
+- **Return Value**: A 14-character alphanumeric uppercase hardware hash (e.g., `VRJYS7F6RHGER4`).
+- **Purpose**: Run this function on the client's production server to determine the target Device ID before building a hardware-locked package.
 
 ---
 
 ### 2. `phob_build()`
-Obfuscates, encrypts, and packages a raw PHP source file into a protected distribution file.
+Packages, secures, and compiles raw PHP code into a protected distribution `.phob` file.
 
 ```php
 bool phob_build(
@@ -241,175 +199,204 @@ bool phob_build(
 ```
 
 #### Parameters:
-- **`$input_path`** *(string)*: Absolute or relative path to the plain PHP script to protect.
-- **`$output_path`** *(string)*: Destination file path for the encrypted binary payload.
-- **`$skip_list`** *(array)*: Optional list of files or paths to exempt.
-- **`$config`** *(array)*: Associative array of encryption and licensing constraints:
-  - `"key"` *(string, optional)*: Master passkey for secondary symmetric encryption.
-  - `"pass"` *(string, optional)*: Additional passphrase salt.
-  - `"license"` *(string, optional)*: Customer license string (e.g. `LIC-2026-XYZ`).
-  - `"device"` *(string, optional)*: The hardware ID returned by `phob_deviceID()` to lock execution to.
-  - `"expiry"` *(string, optional)*: Expiration date in strict format `DD/MM/YYYY` (e.g. `31/12/2026`).
+- **`$input_path`** *(string)*: Path to the raw PHP source file to protect.
+- **`$output_path`** *(string)*: Destination file path for the generated protected payload (conventionally ending in `.phob`).
+- **`$skip_list`** *(array)*: Optional list of files or sub-paths to exclude.
+- **`$config`** *(array)*: Associative array of security configuration and licensing parameters:
 
-- **Returns**: `true` on success, or throws an `E_ERROR` / returns `false` on failure.
+| Config Key | Type | Description | Example |
+| :--- | :--- | :--- | :--- |
+| `"key"` | `string` | Master secret key for envelope packaging. | `"MyEnterpriseSecret2026"` |
+| `"pass"` | `string` | Additional security salt passphrase. | `"CustomSaltVal#99"` |
+| `"license"` | `string` | Customer or deployment license identifier. | `"LIC-CORP-98421"` |
+| `"device"` | `string` | Lock execution to this hardware Device ID. | `"VRJYS7F6RHGER4"` |
+| `"expiry"` | `string` | Expiry date in strict `DD/MM/YYYY` format. | `"31/12/2026"` |
+
+- **Return Value**: `true` on successful build, `false` on failure.
 
 ---
 
 ### 3. `phob_use()`
-Securely decrypts and executes the protected file directly in PHP runtime memory.
+Decrypts and executes the protected `.phob` package directly in PHP runtime memory.
 
 ```php
 bool phob_use(string $encrypted_file_path)
 ```
-- **`$encrypted_file_path`** *(string)*: Path to the encrypted file generated via `phob_build()`.
-- **Returns**: `true` on successful execution, or halts execution with an `E_ERROR` if verification fails (expired date, wrong hardware, or corrupted payload).
+- **`$encrypted_file_path`** *(string)*: Path to the `.phob` file generated by `phob_build()`.
+- **Return Value**: `true` on successful execution. Halts execution or raises an `E_ERROR` / `E_WARNING` if verification fails.
 
 ---
 
-## 🛠️ Complete Step-by-Step Example
+## 🛠️ Complete Step-by-Step Workflow
 
-### Step 1: Get Target Hardware ID
-Provide your client with a simple one-line script to obtain their server's Device ID:
+### Step 1: Obtain Target Hardware ID
+Provide the client with a one-line script to retrieve their server's Device ID:
 
 ```php
 <?php
-// get_id.php
+// get_device_id.php
 if (extension_loaded('phob')) {
-    echo "Client Device ID: " . phob_deviceID() . PHP_EOL;
+    echo "Server Device ID: " . phob_deviceID() . PHP_EOL;
 } else {
-    echo "PHOB extension not loaded." . PHP_EOL;
+    echo "Error: phob extension is not loaded." . PHP_EOL;
 }
 ```
 *Client Output:*
 ```text
-Client Device ID: VRJYS7F6RHGER4
+Server Device ID: VRJYS7F6RHGER4
 ```
 
 ---
 
 ### Step 2: Build Encrypted Package
-On your build/deployment machine, encrypt your raw script:
+On your development or deployment build machine, secure your proprietary code:
 
-**Raw Code (`app_core.php`):**
+**Source File (`PaymentGateway.php`):**
 ```php
 <?php
-class SecurityService {
-    public function authorize() {
-        return "Access Granted: Proprietary logic active.";
+class PaymentGateway {
+    public function processTransaction($amount, $customerEmail) {
+        return [
+            'status'         => 'SUCCESS',
+            'transaction_id' => 'TXN_' . strtoupper(bin2hex(random_bytes(8))),
+            'amount'         => $amount,
+            'tax'            => $amount * 0.05,
+            'total_charged'  => $amount * 1.05,
+            'customer'       => $customerEmail,
+            'timestamp'      => date('Y-m-d H:i:s'),
+            'verified'       => 1
+        ];
     }
 }
-$service = new SecurityService();
-echo $service->authorize() . PHP_EOL;
 ```
 
-**Build Script (`builder.php`):**
+**Build Script (`build.php`):**
 ```php
 <?php
 $config = [
-    "key"     => "EnterpriseMasterSecret",
-    "pass"    => "AppSalt9988",
-    "license" => "PRO-LICENSE-8849-B2C",
-    "device"  => "VRJYS7F6RHGER4",     // Lock to client's Device ID
-    "expiry"  => "31/12/2026"          // Expire at midnight on Dec 31, 2026
+    "key"     => "EnterpriseMasterSecretKey2026",
+    "pass"    => "AppDeploymentSalt#8841",
+    "license" => "LIC-CLIENT-PRO-2026",
+    "device"  => "VRJYS7F6RHGER4",     // Lock to client machine
+    "expiry"  => "31/12/2026"          // Valid until Dec 31, 2026
 ];
 
-$success = phob_build('app_core.php', 'app_core.phob', [], $config);
+$success = phob_build(
+    __DIR__ . '/PaymentGateway.php',
+    __DIR__ . '/PaymentGateway.phob',
+    [],
+    $config
+);
 
 if ($success) {
-    echo "Build successful: app_core.phob generated." . PHP_EOL;
+    echo "Build SUCCESS: PaymentGateway.phob generated." . PHP_EOL;
 } else {
-    echo "Build failed." . PHP_EOL;
+    echo "Build FAILED." . PHP_EOL;
 }
 ```
 
 ---
 
-### Step 3: Run Protected Code
-On the client machine (with the PHOB extension installed):
+### Step 3: Execute Protected Code in Application
+Deploy `PaymentGateway.phob` to the client server. The client application loads and executes it seamlessly:
 
-**Entry Point (`index.php`):**
+**Client Entry Script (`index.php`):**
 ```php
 <?php
-// Directly load and run protected file in memory
-phob_use('app_core.phob');
+// 1. Verify extension
+if (!extension_loaded('phob')) {
+    die("Fatal: PHOB extension is required.");
+}
 
-// Protected classes and variables are now instantiated and available
+// 2. Load protected module directly into memory
+$loaded = phob_use(__DIR__ . '/PaymentGateway.phob');
+if (!$loaded) {
+    die("Failed to execute protected code.");
+}
+
+// 3. Classes from PaymentGateway.phob are now available in runtime
+$gateway = new PaymentGateway();
+$result = $gateway->processTransaction(250.00, 'customer@example.com');
+
+print_r($result);
+```
+
+*Output:*
+```text
+Array
+(
+    [status] => SUCCESS
+    [transaction_id] => TXN_564FBC818D2C8885
+    [amount] => 250
+    [tax] => 12.5
+    [total_charged] => 262.5
+    [customer] => customer@example.com
+    [timestamp] => 2026-10-27 15:34:09
+    [verified] => 1
+)
 ```
 
 ---
 
-## 🔒 Licensing Rules & Enforcement Matrix
+## 🔒 Licensing Rules, Verification & Errors
 
-When `phob_use()` is called, the extension enforces a non-bypassable sequence of checks in kernel/native memory:
+When `phob_use()` is called, the extension performs real-time validation checks:
 
 ```
-[Start Execution]
-       │
-       ▼
-[Anti-Debugger Check] ──(Debugger Active)──► [Immediate Process Exit]
-       │
-       ▼
-[Anti-Core-Dump Check (Linux)]
-       │
-       ▼
-[Read & Parse Dynamic Header Stamp]
-       │
-       ▼
-[Puzzle Removal & AES-256-GCM Decrypt] ──(Tampered / Invalid Key)──► [Halt with E_ERROR]
-       │
-       ▼
-[Expiry Date Verification] ──(Now > Expiry)──► [Halt: "Service is expired"]
-       │
-       ▼
-[Hardware Device ID Match] ──(Device != Machine)──► [Halt: "Service not authenticated"]
-       │
-       ▼
-[Zend Compile to Opcode Memory]
-       │
-       ▼
-[Zero-Memory Shredding of Plaintext]
-       │
-       ▼
-[Execute in Runtime VM]
+[phob_use() Called]
+        │
+        ▼
+[Integrity Verification] ──(Payload Tampered / Corrupted)──► "File integrity check failed"
+        │
+        ▼
+[License Expiry Check]   ──(Current Date > Expiry)────────► "Service is expired"
+        │
+        ▼
+[Device ID Verification] ──(Device Hash Mismatch)────────► "Service not authenticated for this device"
+        │
+        ▼
+[In-Memory Zend Compilation & Opcode Execution]
+        │
+        ▼
+[Zero-Wipe Plaintext Memory Buffer]
 ```
 
-1. **Expiry Date Validation**:
-   - Compares the server's current UTC Unix timestamp against 23:59:59 of the specified `DD/MM/YYYY`.
-   - If expired: Execution aborts with `Fatal error: phob_use(): Service is expired`.
+### Common Errors & Explanations:
 
-2. **Device Hardware Validation**:
-   - Compares the embedded hash with the real-time generated hardware fingerprint.
-   - If executed on any other machine: Execution aborts with `Fatal error: phob_use(): Service not authenticated for this device`.
+| Error Notice / Warning | Cause | Resolution |
+| :--- | :--- | :--- |
+| `phob_use(): Service is expired` | The server's current date has exceeded the `"expiry"` date set during `phob_build()`. | Rebuild the `.phob` file with an updated `"expiry"` date for the license renewal. |
+| `phob_use(): Service not authenticated for this device` | The `.phob` file was locked to a different Device ID than the machine executing it. | Verify `phob_deviceID()` on the target machine and rebuild the package for that specific Device ID. |
+| `phob_use(): File integrity check failed` | The `.phob` file was modified, truncated, or corrupted in transit. | Re-upload the `.phob` file using binary transfer mode. |
+| `Call to undefined function phob_use()` | The `phob` extension is not loaded in PHP. | Verify `extension=php_phob` (Windows) or `extension=phob.so` (Linux) in `php.ini`. |
+| `Failed to execute protected code` | `phob_use()` returned `false` due to failed authorization or compilation. | Check PHP error logs for specific diagnostic warnings. |
 
 ---
 
 ## ❓ Troubleshooting & FAQ
 
-#### Q1: "Call to undefined function phob_build()" or "phob_use()"
-- Ensure `extension=phob.so` (Linux/macOS) or `extension=phob.dll` (Windows) is added to the **correct** `php.ini` file.
-- Check active loaded configuration file with `php --ini`.
+#### Q1: Where can I download pre-built binaries for my PHP version?
+- Windows builds: [https://github.com/mystack-framework/phob/tree/main/windows](https://github.com/mystack-framework/phob/tree/main/windows)
+- Linux builds: [https://github.com/mystack-framework/phob/tree/main/linux](https://github.com/mystack-framework/phob/tree/main/linux)
 
-#### Q2: Can the decrypted PHP code be dumped to disk?
-- **No.** PHOB does not use temporary files (`/tmp`, `sys_get_temp_dir`). All decryption occurs strictly in dynamically allocated C heap memory, compiled directly to Zend memory, and immediately wiped with `memset(0)`.
+#### Q2: Is OPcache supported?
+**Yes.** PHOB integrates directly with Zend OPcache. Decrypted opcodes are executed natively without performance penalty.
 
-#### Q3: Does PHOB work with OPcache enabled?
-- **Yes.** PHOB is fully compatible with Zend OPcache. Protected files executed through `phob_use()` execute directly via Zend opcodes.
+#### Q3: How do I remove license restrictions for trial distributions?
+If you do not want to restrict by hardware or expiration date, simply omit `"device"` and `"expiry"` from the `$config` array:
+```php
+$config = [
+    "key"  => "YourSecretKey",
+    "pass" => "YourSalt"
+];
+```
 
-#### Q4: How does Windows hardware detection work without `wmic`?
-- Windows 11 removed `wmic.exe`. PHOB accesses the Windows Kernel Cryptographic Registry (`HKLM\SOFTWARE\Microsoft\Cryptography\MachineGuid`) directly through native Win32 `Advapi32` APIs without spawning shell sub-processes.
-
----
-
-## 🛡️ Security Best Practices
-
-1. **Keep Binaries Stripped**: Distribute pre-compiled binaries (`phob.so`, `phob.dll`) stripped of all debug symbols.
-2. **Combine Device Locking with Expiration Dates**: For maximum revenue protection, bind licenses to both a client device ID and a specific support contract expiration date.
-3. **Restrict Server Access**: Ensure permissions on production web servers restrict read access to configuration files and PHP logs.
-4. **Never Commit Raw Master Keys**: Do not commit build scripts containing sensitive production keys to public git repositories.
+#### Q4: How is the Windows Device ID generated without `wmic`?
+Windows 11 removed `wmic.exe`. PHOB uses the native Windows Win32 Registry API directly (`Advapi32`) to query `MachineGuid` from `HKLM\SOFTWARE\Microsoft\Cryptography`, ensuring native compatibility without external processes.
 
 ---
 
-## 🔗 Links & Resources
+## 🔗 Official Links & Resources
 - **GitHub Repository**: [https://github.com/mystack-framework/phob](https://github.com/mystack-framework/phob)
-- **Linux Extension**: [phob.so](https://github.com/mystack-framework/phob/blob/main/phob.so)
-- **Windows Extension**: [phob.dll](https://github.com/mystack-framework/phob/blob/main/phob.dll)
+- **Windows Extensions**: [https://github.com/mystack-framework/phob/tree/main/windows](https://github.com/mystack-framework/phob/tree/main/windows)
+- **Linux Extensions**: [https://github.com/mystack-framework/phob/tree/main/linux](https://github.com/mystack-framework/phob/tree/main/linux)
